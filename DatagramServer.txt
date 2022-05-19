@@ -1,0 +1,44 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+
+public class DatagramServer {
+
+	public static DatagramSocket ds;
+	public static int clientport = 1789, serverport = 1790;
+	public static void main(String[] args) throws Exception {
+		
+		byte buffer[] = new byte[1024];
+		ds = new DatagramSocket(serverport);
+		BufferedReader breader = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Server is waiting for connection");
+		DatagramPacket dp = new DatagramPacket(buffer, buffer.length);
+		ds.receive(dp);
+		String pdata = new String(dp.getData(),0,dp.getLength());
+		System.out.println("Connected...sending Hello Message");
+		String st = "Hello";
+		buffer = st.getBytes();
+		ds.send(new DatagramPacket(buffer, st.length(),InetAddress.getLocalHost(),clientport));
+		
+		while(true) {
+			ds.receive(dp);
+			String recvdata = new String(dp.getData(),0,dp.getLength());
+			System.out.println("recvdata");
+			String str = breader.readLine();
+			buffer = str.getBytes();
+			if(str==null || str.equals("End")) {
+				ds.send(new DatagramPacket(buffer, str.length(),InetAddress.getLocalHost(),clientport));
+				break;
+			}
+			ds.send(new DatagramPacket(buffer, str.length(),InetAddress.getLocalHost(),clientport));
+		
+		}
+		
+	}
+		
+	
+
+}
