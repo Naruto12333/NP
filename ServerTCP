@@ -1,0 +1,24 @@
+import java.io.*;
+import java.net.*;
+class tcpserver1
+{
+public static void main(String args[ ])throws IOException
+{
+ServerSocket ss=new ServerSocket(55);
+Socket s=ss.accept();
+System.out.println("Connected");
+DataInputStream in=new DataInputStream(s.getInputStream());
+DataOutputStream out=new DataOutputStream(s.getOutputStream());
+DataInputStream sysin=new DataInputStream(System.in);
+while(true)
+{
+System.out.println("Enter an string:");
+String str=sysin.readLine();
+out.writeBytes(str+"\n");
+if(str.equals("End"))
+break;
+System.out.println("Message from client"+in.readLine());
+}
+ss.close();
+}
+}
