@@ -1,0 +1,59 @@
+Exp 1: THREE NODE POINT TO POINT NETWORK
+Aim: Simulate a three node point to point network with duplex links between them. Set queue size and vary the bandwidth and find number of packets dropped.
+set ns [new Simulator] # Letter S is capital
+set nf [open PA1.nam w] # open a nam trace file in write mode
+$ns namtrace-all $nf # nf nam filename
+set tf [open PA1.tr w] # tf trace filename
+$ns trace-all $tf
+proc finish { } {
+global ns nf tf
+$ns flush-trace # clears trace file contents
+close $nf
+close $tf
+exec nam PA1.nam &
+exit 0
+}
+set n0 [$ns node] # creates 3 nodes
+set n2 [$ns node]
+set n3 [$ns node]
+$ns duplex-link $n0 $n2 200Mb 10ms DropTail # establishing links
+$ns duplex-link $n2 $n3 1Mb 1000ms DropTail
+$ns queue-limit $n0 $n2 10
+set udp0 [new Agent/UDP] # attaching transport layer protocols
+$ns attach-agent $n0 $udp0
+set cbr0 [new Application/Traffic/CBR] # attaching application layer protocols
+$cbr0 set packetSize_ 500
+$cbr0 set interval_ 0.005
+$cbr0 attach-agent $udp0
+set null0 [new Agent/Null]
+$ns attach-agent $n3 $null0
+$ns connect $udp0 $null0
+$ns at 0.1 "$cbr0 start"
+$ns at 1.0 "finish"
+$ns run
+AWK file: (Open a new editor using “vi command” and write awk file and save with “.awk”
+extension)
+#immediately after BEGIN should open braces {
+BEGIN{ c=0;}
+{
+if($1= ="d")
+{c++;
+printf("%s\t%s\n",$5,$11);
+}
+}
+END{ printf("The number of packets dropped =%d\n",c); }
+Steps for execution Open vi editor and type program. Program name should have the extension “ .tcl ”
+[root@localhost ~]# vi lab1.tcl
+Save the program by pressing “ESC key” first, followed by “Shift and :” keys simultaneously and type “wq” and press Enter key.
+Open vi editor and type awk program. Program name should have the extension “.awk ”
+[root@localhost ~]# vi lab1.awk
+Save the program by pressing “ESC key” first, followed by “Shift and :” keys simultaneously and type “wq” and press Enter key.
+Run the simulation program
+[root@localhost~]# ns lab1.tcl
+Here “ns” indicates network simulator. We get the topology shown in the snapshot.
+Now press the play button in the simulation window and the simulation will begins.
+After simulation is completed run awk file to see the output ,
+[root@localhost~]# awk –f lab1.awk lab1.tr To see the trace file contents open the file as ,
+[root@localhost~]# vi lab1.tr
+Trace file contains 12 columns:
+Event type, Event time, From Node, To Node, Packet Type, Packet Size, Flags (indicated by --------), Flow ID, Source address, Destination address, Sequence ID, Packet ID
