@@ -1,0 +1,82 @@
+Exp 3: ETHERNET LAN USING N-NODES
+Aim: Simulate an Ethernet LAN using n nodes, change error rate and data rate and compare
+throughput.
+set ns [new Simulator]
+set tf [open lab5.tr w]
+$ns trace-all $tf
+set nf [open lab5.nam w]
+$ns namtrace-all $nf
+$ns color 0 blue
+set n0 [$ns node]
+$n0 color "red"
+set n1 [$ns node]
+$n1 color "red"
+set n2 [$ns node]
+$n2 color "red"
+set n3 [$ns node]
+$n3 color "red"
+set n4 [$ns node]
+$n4 color "magenta"
+set n5 [$ns node]
+$n5 color "magenta"
+set n6 [$ns node]
+$n6 color "magenta"
+set n7 [$ns node]
+$n7 color "magenta"
+$ns make-lan "$n0 $n1 $n2 $n3" 100Mb 300ms LL Queue/ DropTail Mac/802_3 $ns make-lan "$n4 $n5 $n6 $n7" 100Mb 300ms LL Queue/ DropTail Mac/802_3
+$ns duplex-link $n3 $n4 100Mb 300ms DropTail $ns duplex-link-op $n3 $n4 color "green"
+# set error rate. Here ErrorModel is a class and it is single word and space should not be given between Error and Model
+# lossmodel is a command and it is single word. Space should not be given between loss and model
+set err [new ErrorModel]
+$ns lossmodel $err $n3 $n4
+$err set rate_ 0.1
+# error rate should be changed for each output like 0.1,0.3,0.5…. */
+set udp [new Agent/UDP]
+$ns attach-agent $n1 $udp
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+$cbr set fid_ 0
+$cbr set packetSize_ 1000
+$cbr set interval_ 0.0001
+set null [new Agent/Null]
+$ns attach-agent $n7 $null
+$ns connect $udp $null
+proc finish { } {
+global ns nf tf
+$ns flush-trace
+close $nf
+close $tf
+exec nam lab5.nam &
+exit 0
+}
+$ns at 0.1 "$cbr start"
+$ns at 3.0 "finish"
+$ns run
+AWK file: (Open a new editor using “vi command” and write awk file and save with “.awk” extension)
+BEGIN{
+pkt=0;
+time=0;
+}
+{
+if($1= ="r" && $3= ="9" && $4= ="7"){
+pkt = pkt + $6;
+time =$2;
+}
+}
+END {
+printf("throughput:%fMbps",(( pkt / time) * (8 / 1000000)));
+}
+Steps for execution
+Open vi editor and type program. Program name should have the extension “ .tcl ”
+[root@localhost ~]# vi lab5.tcl
+Save the program by pressing “ESC key” first, followed by “Shift and :” keys simultaneously and type “wq” and press Enter key. Open vi editor and type awk program. Program name should have the extension “.awk ”
+[root@localhost ~]# vi lab5.awk
+Save the program by pressing “ESC key” first, followed by “Shift and :” keys simultaneously and type “wq” and press Enter key. Run the simulation program
+[root@localhost~]# ns lab5.tcl
+o Here “ns” indicates network simulator. We get the topology shown in the snapshot.
+o Now press the play button in the simulation window and the simulation will begins.
+After simulation is completed run awk file to see the output ,
+[root@localhost~]# awk –f lab5.awk lab5.tr
+To see the trace file contents open the file as ,
+[root@localhost~]# vi lab5.tr
+Here “h” indicates host.
